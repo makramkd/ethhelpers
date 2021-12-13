@@ -16,10 +16,13 @@ limitations under the License.
 package cmd
 
 import (
+	"crypto/ecdsa"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"os"
 
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/spf13/cobra"
 
 	"github.com/makramkd/ethhelpers/lib"
@@ -66,7 +69,14 @@ var generate = &cobra.Command{
 		err = lib.SavePrivateKey(privKey, []byte(key), privFile)
 		fatal(err)
 
-		log.Println("done!")
+		ecdsaPub := pubKey.(*ecdsa.PublicKey)
+		pubBytes := []byte{}
+		pubBytes = append(pubBytes, ecdsaPub.X.Bytes()...)
+		pubBytes = append(pubBytes, ecdsaPub.Y.Bytes()...)
+		encoded := hex.EncodeToString(pubBytes)
+		log.Println("public key X: ", ecdsaPub.X, "public key Y: ", ecdsaPub.Y)
+		log.Println("hex encoded pub key: ", encoded)
+		log.Println("compressed: ", hex.EncodeToString(crypto.CompressPubkey(ecdsaPub)))
 	},
 }
 
@@ -119,12 +129,42 @@ var getAddress = &cobra.Command{
 	},
 }
 
+var decodePubKey = &cobra.Command{
+	Use:   "decode-pubkey",
+	Short: "Decode the given public key to see if it's a valid secp256k1 public key",
+	Long:  ``,
+	Run: func(cmd *cobra.Command, args []string) {
+		keyStr, err := cmd.Flags().GetString("pubkey")
+		fatal(err)
+		if keyStr == "" {
+			log.Fatal("key must not be empty")
+		}
+
+		compressed, err := cmd.Flags().GetBool("compressed")
+		fatal(err)
+		if compressed {
+			b, err := hex.DecodeString(keyStr)
+			fatal(err)
+			pubkey, err := crypto.DecompressPubkey(b)
+			fatal(err)
+			log.Println("pubkey x: ", pubkey.X, "pubkey y: ", pubkey.Y)
+			return
+		}
+
+		pubkey, err := lib.DecodePublicKey(keyStr)
+		fatal(err)
+
+		log.Println("Pubkey x: ", pubkey.X, "Pubkey y: ", pubkey.Y)
+	},
+}
+
 func setupKeysCommand() {
 	rootCmd.AddCommand(keys)
 
 	keys.AddCommand(generate)
 	keys.AddCommand(decrypt)
 	keys.AddCommand(getAddress)
+	keys.AddCommand(decodePubKey)
 
 	generate.Flags().StringP("pub-out", "p", "pubkey.txt", "Text file to write public key to")
 	generate.Flags().StringP("priv-out", "s", "secretkey.bin", "Binary file to write private key to")
@@ -135,6 +175,9 @@ func setupKeysCommand() {
 	decrypt.Flags().StringP("out", "o", "secretkey.txt", "Text file that will contain plaintext private key")
 
 	getAddress.Flags().StringP("pkey", "k", "", "Private key to get address for")
+
+	decodePubKey.Flags().StringP("pubkey", "k", "", "Public key to decode")
+	decodePubKey.Flags().Bool("compressed", false, "Whether the provided key is compressed or not")
 }
 
 func init() {

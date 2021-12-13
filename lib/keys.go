@@ -141,3 +141,17 @@ func decryptAes(ciphertext, secret []byte) (plaintext []byte, err error) {
 	}
 	return plaintext, nil
 }
+
+func DecodePublicKey(pubkey string) (*ecdsa.PublicKey, error) {
+	pubBytes, err := hex.DecodeString(pubkey)
+	if err != nil {
+		return nil, err
+	}
+
+	pubKey, err := crypto.UnmarshalPubkey(pubBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	return pubKey, nil
+}
