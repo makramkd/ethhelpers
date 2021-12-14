@@ -91,3 +91,8 @@ func fatal(err error) {
 		log.Fatal(err)
 	}
 }
+
+func init() {
+	setupKeysCommand()
+	setupAbiCommand()
+}

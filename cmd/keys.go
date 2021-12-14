@@ -132,7 +132,14 @@ var getAddress = &cobra.Command{
 var decodePubKey = &cobra.Command{
 	Use:   "decode-pubkey",
 	Short: "Decode the given public key to see if it's a valid secp256k1 public key",
-	Long:  ``,
+	Long: `Decode the given public key into an (X, Y) pair to see if it's a valid secp256k1 public key.
+
+You can provide both compressed and uncompressed public keys. If providing a compressed key, pass the --compressed flag.
+
+When passing uncompressed keys to the -k flag, make sure to prefix the hex representation with '04' rather than '0x'.
+When passing compressed keys to the -k flag, make sure to prefix the hex representation with '03' or '02', depending on whether
+the Y value of the public key is odd or even, respectively.
+	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		keyStr, err := cmd.Flags().GetString("pubkey")
 		fatal(err)
@@ -178,9 +185,4 @@ func setupKeysCommand() {
 
 	decodePubKey.Flags().StringP("pubkey", "k", "", "Public key to decode")
 	decodePubKey.Flags().Bool("compressed", false, "Whether the provided key is compressed or not")
-}
-
-func init() {
-	setupKeysCommand()
-	setupAbiCommand()
 }
