@@ -112,7 +112,7 @@ var decrypt = &cobra.Command{
 }
 
 var getAddress = &cobra.Command{
-	Use:   "get-address",
+	Use:   "getaddress",
 	Short: "Get the address associated with the given private key",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -130,7 +130,7 @@ var getAddress = &cobra.Command{
 }
 
 var decodePubKey = &cobra.Command{
-	Use:   "decode-pubkey",
+	Use:   "decodepubkey",
 	Short: "Decode the given public key to see if it's a valid secp256k1 public key",
 	Long: `Decode the given public key into an (X, Y) pair to see if it's a valid secp256k1 public key.
 

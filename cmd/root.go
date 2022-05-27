@@ -21,7 +21,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-
+	"github.com/spf13/cobra/doc"
 	"github.com/spf13/viper"
 )
 
@@ -30,16 +30,29 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "ethhelpers",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Short: "A collection of misc utilities that could be helpful in blockchain and cryptography development",
+	Long: `
+ethhelpers contains some utilities that have come up useful in blockchain and cryptography development.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+Execute 'ethhelpers help' to see all the available commands.
+	`,
+}
+
+var docCmd = &cobra.Command{
+	Use:   "doc",
+	Short: "Generate documentation for ethhelpers",
+	Long:  ``,
+	Run: func(cmd *cobra.Command, args []string) {
+		outPath, err := cmd.Flags().GetString("o")
+		fatal(err)
+		if _, err := os.Stat(outPath); os.IsNotExist(err) {
+			fatal(fmt.Errorf("Given path %s does not exist: %w", outPath, err))
+		}
+
+		err = doc.GenMarkdownTree(rootCmd, outPath)
+		fatal(err)
+		fmt.Println("docs generated!")
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -93,6 +106,11 @@ func fatal(err error) {
 }
 
 func init() {
+	docCmd.Flags().String("o", "doc", "Output path of ethhelpers Markdown documentation.")
+
+	rootCmd.AddCommand(docCmd)
+
 	setupKeysCommand()
 	setupAbiCommand()
+	setupBlsCommand()
 }
