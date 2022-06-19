@@ -1,5 +1,5 @@
 /*
-Copyright © 2021 NAME HERE <EMAIL ADDRESS>
+Copyright © 2021 Makram Kamaleddine
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -113,4 +113,5 @@ func init() {
 	setupKeysCommand()
 	setupAbiCommand()
 	setupBlsCommand()
+	setupSSCommand()
 }
